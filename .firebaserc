@@ -1,0 +1,10 @@
+{
+  "projects": {
+    "default": "benin-experience-dev",
+    "staging": "benin-experience-staging",
+    "production": "benin-experience-prod",
+    "dev": "our-oznizahir-project-0209"
+  },
+  "targets": {},
+  "etags": {}
+}

@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "2523423593",
+    "project_id": "our-oznizahir-project-0209",
+    "storage_bucket": "our-oznizahir-project-0209.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:2523423593:android:c7d143ca70fab2463b53f8",
+        "android_client_info": {
+          "package_name": "com.benin.benin_experience"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBNlfMaUU8IMAouykfzgacKxZAMCf_CRB8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:2523423593:android:c62f281b0a0f5aff3b53f8",
+        "android_client_info": {
+          "package_name": "com.example.benin_experience"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBNlfMaUU8IMAouykfzgacKxZAMCf_CRB8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

@@ -1,0 +1,70 @@
+rules_version = '2';
+service firebase.storage {
+  match /b/{bucket}/o {
+    // Helper functions
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+    
+    function isOwner(userId) {
+      return request.auth.uid == userId;
+    }
+    
+    function isProfessional() {
+      return request.auth.token.professional == true;
+    }
+    
+    function isVerified() {
+      return request.auth.token.verified == true;
+    }
+    
+    // User avatars - only owner can write, public read
+    match /users/{userId}/avatars/{fileName} {
+      allow read: if true;
+      allow write: if isAuthenticated() && isOwner(userId);
+    }
+    
+    // Verification documents - only owner and admins
+    match /verification_docs/{userId}/{documentType}/{fileName} {
+      allow read: if isAuthenticated() && (
+        isOwner(userId) || 
+        request.auth.token.admin == true
+      );
+      allow write: if isAuthenticated() && isOwner(userId);
+      allow delete: if isAuthenticated() && (
+        isOwner(userId) || 
+        request.auth.token.admin == true
+      );
+    }
+    
+    // Post images - public read, owner write
+    match /posts/{userId}/{postId}/{fileName} {
+      allow read: if true;
+      allow write: if isAuthenticated() && isOwner(userId);
+      allow delete: if isAuthenticated() && isOwner(userId);
+    }
+    
+    // Story media - public read, owner write, auto-delete after expiry
+    match /stories/{userId}/{storyId}/{fileName} {
+      allow read: if true;
+      allow write: if isAuthenticated() && isOwner(userId);
+      allow delete: if isAuthenticated() && (
+        isOwner(userId) || 
+        resource.metadata.deleted == 'true'
+      );
+    }
+    
+    // Chat attachments - participants only
+    match /chat/{conversationId}/{messageId}/{fileName} {
+      allow read: if isAuthenticated() && 
+        exists(/databases/$(database)/documents/conversations/$(conversationId)/participants/$(request.auth.uid));
+      allow write: if isAuthenticated() && 
+        exists(/databases/$(database)/documents/conversations/$(conversationId)/participants/$(request.auth.uid));
+    }
+    
+    // Default deny
+    match /{allPaths=**} {
+      allow read, write: if false;
+    }
+  }
+}
