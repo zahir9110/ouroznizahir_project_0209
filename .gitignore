@@ -55,6 +55,7 @@ Thumbs.db
 
 # Secrets
 .env
+.env.*
 *.key
 *.pem
 lib/firebase_options.dart
