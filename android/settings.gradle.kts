@@ -1,4 +1,9 @@
 pluginManagement {
+     repositories {
+        google()
+        mavenCentral()
+        gradlePluginPortal()
+    }
     val flutterSdkPath =
         run {
             val properties = java.util.Properties()

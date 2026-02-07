@@ -17,6 +17,7 @@ build/
 **/android/gradlew.bat
 **/android/local.properties
 **/android/**/GeneratedPluginRegistrant.java
+**/android/secrets.properties
 
 # iOS
 **/ios/**/*.mode1v3
@@ -40,6 +41,7 @@ build/
 functions/lib/
 functions/node_modules/
 functions/.env
+functions/.env.*
 functions/serviceAccountKey.json
 
 # IDE
