@@ -1,6 +1,6 @@
 
 class AppConstants {
-  static const String appName = 'Benin Experience';
+  static const String appName = 'bōken';
   static const String appVersion = '1.0.0';
   
   // Firebase Collections
@@ -11,12 +11,33 @@ class AppConstants {
   static const String verificationRequestsCollection = 'verification_requests';
   static const String eventsCollection = 'events';
   static const String bookingsCollection = 'bookings';
+  static const String organizersCollection = 'organizers';
+  static const String offersCollection = 'offers';
+  static const String reviewsCollection = 'reviews';
+  static const String boostCampaignsCollection = 'boost_campaigns';
+  static const String payoutsCollection = 'payouts';
   
   // Storage Paths
   static const String userAvatarsPath = 'users/avatars';
   static const String postImagesPath = 'posts/images';
   static const String storyMediaPath = 'stories/media';
   static const String verificationDocsPath = 'verification/documents';
+  static const String offerMediaPath = 'offers/media';
+  static const String reviewPhotosPath = 'reviews/photos';
+  
+  // Business Constants
+  static const double defaultCommissionRate = 8.0; // 8%
+  static const int minPayoutAmount = 5000; // XOF
+  static const String defaultCurrency = 'XOF';
+  
+  // Boost Pricing (XOF)
+  static const int boostFeedPrice7Days = 2000;
+  static const int boostGuidePrice30Days = 5000;
+  static const int boostTopExperiencePrice = 10000;
+  
+  // Subscription Pricing (XOF/month)
+  static const int subscriptionPlusPrice = 15000;
+  static const double subscriptionPlusCommission = 5.0; // 5%
   
   // Durations
   static const Duration storyDurationStandard = Duration(hours: 24);

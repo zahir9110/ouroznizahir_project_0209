@@ -29,7 +29,10 @@ class _VerificationWizardPageState extends State<VerificationWizardPage> {
       title: 'Identité',
       subtitle: 'Qui êtes-vous ?',
       icon: Icons.badge_outlined,
-      validationGetter: (state) => state.stepIdentityValid,
+      validationGetter: (state) {
+        final s = state is VerificationInProgress ? state : const VerificationInProgress(currentStep: 0, completionPercentage: 0);
+        return s.stepIdentityValid;
+      },
       questionCategory: QuestionCategory.identity,
     ),
     
@@ -39,7 +42,10 @@ class _VerificationWizardPageState extends State<VerificationWizardPage> {
       title: 'Métier',
       subtitle: 'Votre activité',
       icon: Icons.work_outline,
-      validationGetter: (state) => state.stepProfessionalValid,
+      validationGetter: (state) {
+        final s = state is VerificationInProgress ? state : const VerificationInProgress(currentStep: 0, completionPercentage: 0);
+        return s.stepProfessionalValid;
+      },
       questionCategory: QuestionCategory.legitimacy,
     ),
     
@@ -49,7 +55,10 @@ class _VerificationWizardPageState extends State<VerificationWizardPage> {
       title: 'Localisation',
       subtitle: 'Où vous trouvez-vous ?',
       icon: Icons.location_on_outlined,
-      validationGetter: (state) => state.stepLocationValid,
+      validationGetter: (state) {
+        final s = state is VerificationInProgress ? state : const VerificationInProgress(currentStep: 0, completionPercentage: 0);
+        return s.stepLocationValid;
+      },
       questionCategory: QuestionCategory.legitimacy,
     ),
     
@@ -59,7 +68,10 @@ class _VerificationWizardPageState extends State<VerificationWizardPage> {
       title: 'Documents',
       subtitle: 'Justificatifs (optionnel)',
       icon: Icons.folder_open_outlined,
-      validationGetter: (state) => state.stepDocumentsValid,
+      validationGetter: (state) {
+        final s = state is VerificationInProgress ? state : const VerificationInProgress(currentStep: 0, completionPercentage: 0);
+        return s.stepDocumentsValid;
+      },
       questionCategory: QuestionCategory.legitimacy,
       isOptional: true,
     ),
@@ -70,7 +82,10 @@ class _VerificationWizardPageState extends State<VerificationWizardPage> {
       title: 'Photos',
       subtitle: 'Votre lieu en images',
       icon: Icons.photo_camera_outlined,
-      validationGetter: (state) => state.stepMediaValid,
+      validationGetter: (state) {
+        final s = state is VerificationInProgress ? state : const VerificationInProgress(currentStep: 0, completionPercentage: 0);
+        return s.stepMediaValid;
+      },
       questionCategory: QuestionCategory.trust,
       isRequiredForTrust: true,
     ),
@@ -81,7 +96,10 @@ class _VerificationWizardPageState extends State<VerificationWizardPage> {
       title: 'Expérience',
       subtitle: 'Votre historique (optionnel)',
       icon: Icons.star_outline,
-      validationGetter: (state) => state.stepHistoryValid,
+      validationGetter: (state) {
+        final s = state is VerificationInProgress ? state : const VerificationInProgress(currentStep: 0, completionPercentage: 0);
+        return s.stepHistoryValid;
+      },
       questionCategory: QuestionCategory.trust,
       isOptional: true,
     ),
@@ -140,23 +158,28 @@ class _VerificationWizardPageState extends State<VerificationWizardPage> {
   @override
   Widget build(BuildContext context) {
     return BlocConsumer<VerificationBloc, VerificationState>(
-      listener: (context, state) {
-        // Auto-navigation si étape suivante devient valide
-        if (state.submissionStatus == VerificationSubmissionStatus.success) {
+      listener: (context, state) {        final progressState = state is VerificationInProgress 
+            ? state 
+            : const VerificationInProgress(currentStep: 0, completionPercentage: 0);        // Auto-navigation si étape suivante devient valide
+        if (progressState.submissionStatus == VerificationSubmissionStatus.success) {
           Navigator.of(context).pop(true);
         }
       },
       builder: (context, state) {
+        final progressState = state is VerificationInProgress 
+            ? state 
+            : const VerificationInProgress(currentStep: 0, completionPercentage: 0);
+            
         return Scaffold(
           backgroundColor: const Color(0xFFFAFAFA),
-          appBar: _buildAppBar(state),
+          appBar: _buildAppBar(progressState),
           body: Column(
             children: [
               // 🎯 Indicateur de progression contextualisé
-              _buildProgressHeader(state),
+              _buildProgressHeader(progressState),
               
               // 📊 Stepper visuel avec couleurs par catégorie
-              _buildStepper(state),
+              _buildStepper(progressState),
               
               // 📄 Contenu des étapes
               Expanded(
@@ -175,7 +198,7 @@ class _VerificationWizardPageState extends State<VerificationWizardPage> {
               ),
               
               // 🧭 Navigation inférieure
-              _buildBottomNavigation(state),
+              _buildBottomNavigation(progressState),
             ],
           ),
         );
@@ -183,7 +206,7 @@ class _VerificationWizardPageState extends State<VerificationWizardPage> {
     );
   }
 
-  PreferredSizeWidget _buildAppBar(VerificationState state) {
+  PreferredSizeWidget _buildAppBar(VerificationInProgress state) {
     return AppBar(
       elevation: 0,
       backgroundColor: Colors.white,
@@ -230,7 +253,7 @@ class _VerificationWizardPageState extends State<VerificationWizardPage> {
     );
   }
 
-  Widget _buildProgressHeader(VerificationState state) {
+  Widget _buildProgressHeader(VerificationInProgress state) {
     return Container(
       padding: const EdgeInsets.all(16),
       color: Colors.white,
@@ -331,7 +354,7 @@ class _VerificationWizardPageState extends State<VerificationWizardPage> {
     );
   }
 
-  Widget _buildStepper(VerificationState state) {
+  Widget _buildStepper(VerificationInProgress state) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       color: Colors.white,
@@ -403,7 +426,7 @@ class _VerificationWizardPageState extends State<VerificationWizardPage> {
     );
   }
 
-  Widget _buildBottomNavigation(VerificationState state) {
+  Widget _buildBottomNavigation(VerificationInProgress state) {
     final currentStepConfig = _steps[_currentStep];
     final isLastStep = _currentStep == _steps.length - 1;
     final canProceed = currentStepConfig.validationGetter(state);
@@ -480,19 +503,23 @@ class _VerificationWizardPageState extends State<VerificationWizardPage> {
   }
 
   void _submit(VerificationState state) {
-    if (!state.isReadyForSubmission) {
-      _showIncompleteDialog(context, state);
+    final progressState = state is VerificationInProgress 
+        ? state 
+        : const VerificationInProgress(currentStep: 0, completionPercentage: 0);
+        
+    if (!progressState.isReadyForSubmission) {
+      _showIncompleteDialog(context, progressState);
       return;
     }
 
     // Afficher récapitulatif IA avant soumission
     showDialog(
       context: context,
-      builder: (context) => _buildSubmissionDialog(state),
+      builder: (context) => _buildSubmissionDialog(progressState),
     );
   }
 
-  Widget _buildSubmissionDialog(VerificationState state) {
+  Widget _buildSubmissionDialog(VerificationInProgress state) {
     return AlertDialog(
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       title: Row(
@@ -582,7 +609,7 @@ class _VerificationWizardPageState extends State<VerificationWizardPage> {
     );
   }
 
-  void _showIncompleteDialog(BuildContext context, VerificationState state) {
+  void _showIncompleteDialog(BuildContext context, VerificationInProgress state) {
     final missing = <String>[];
     if (!state.identityValid) missing.add('Identité complète');
     if (!state.legitimacyValid) missing.add('Localisation vérifiée');

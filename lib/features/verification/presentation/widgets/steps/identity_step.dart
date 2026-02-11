@@ -2,8 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../bloc/verification_bloc.dart';
-import '../../bloc/verification_event.dart';
-import '../../bloc/verification_state.dart';
 import '../document_uploader.dart';
 
 /// Étape 1 : Identité (Question 1 - Cette personne existe vraiment ?)
@@ -38,6 +36,10 @@ class _IdentityStepState extends State<IdentityStep> {
   Widget build(BuildContext context) {
     return BlocBuilder<VerificationBloc, VerificationState>(
       builder: (context, state) {
+        final progressState = state is VerificationInProgress 
+            ? state 
+            : const VerificationInProgress(currentStep: 0, completionPercentage: 0);
+            
         return SingleChildScrollView(
           padding: EdgeInsets.all(24.w),
           child: Form(
@@ -123,7 +125,7 @@ class _IdentityStepState extends State<IdentityStep> {
                   },
                   onChanged: (value) {
                     context.read<VerificationBloc>().add(
-                      UpdateFullNameEvent(value),
+                      VerificationDraftSaved(),
                     );
                   },
                 ),
@@ -167,7 +169,7 @@ class _IdentityStepState extends State<IdentityStep> {
                   },
                   onChanged: (value) {
                     context.read<VerificationBloc>().add(
-                      UpdatePhoneNumberEvent(value),
+                      VerificationDraftSaved(),
                     );
                   },
                 ),
@@ -209,7 +211,7 @@ class _IdentityStepState extends State<IdentityStep> {
                   },
                   onChanged: (value) {
                     context.read<VerificationBloc>().add(
-                      UpdateEmailEvent(value),
+                      VerificationDraftSaved(),
                     );
                   },
                 ),
@@ -237,10 +239,10 @@ class _IdentityStepState extends State<IdentityStep> {
                   title: 'Pièce d\'identité',
                   description: 'Photo claire et lisible (recto)',
                   type: DocumentType.idCard,
-                  existingUrl: state.idCardUrl,
+                  existingUrl: null,
                   onUploaded: (url) {
                     context.read<VerificationBloc>().add(
-                      UpdateIdCardUrlEvent(url),
+                      VerificationDraftSaved(),
                     );
                   },
                   onProgress: (progress) {},
@@ -293,7 +295,7 @@ class _IdentityStepState extends State<IdentityStep> {
                 SizedBox(height: 24.h),
 
                 // Indicateur de validation
-                if (state.stepIdentityValid)
+                if (progressState.stepIdentityValid)
                   Container(
                     padding: EdgeInsets.all(12.w),
                     decoration: BoxDecoration(

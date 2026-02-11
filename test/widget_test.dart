@@ -9,11 +9,16 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'package:benin_experience/main.dart';
+import 'package:benin_experience/core/services/favorites_service.dart';
 
 void main() {
   testWidgets('App smoke test', (WidgetTester tester) async {
+    // Setup FavoritesService for testing
+    final favoritesService = FavoritesService();
+    await favoritesService.initialize();
+    
     // Build our app and trigger a frame.
-    await tester.pumpWidget(const BeninExperienceApp());
+    await tester.pumpWidget(BokenApp(favoritesService: favoritesService));
 
     // Verify that app launches successfully
     expect(find.byType(MaterialApp), findsOneWidget);

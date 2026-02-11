@@ -130,10 +130,7 @@ class _LocationStepState extends State<LocationStep> {
                     _selectedCity = null; // Reset ville
                   });
                   context.read<VerificationBloc>().add(
-                    VerificationFieldChanged(
-                      field: 'region',
-                      value: value,
-                    ),
+                    VerificationDraftSaved(),
                   );
                 },
               ),
@@ -174,10 +171,7 @@ class _LocationStepState extends State<LocationStep> {
                     ? (value) {
                         setState(() => _selectedCity = value);
                         context.read<VerificationBloc>().add(
-                          VerificationFieldChanged(
-                            field: 'city',
-                            value: value,
-                          ),
+                          VerificationDraftSaved(),
                         );
                       }
                     : null,
@@ -210,10 +204,7 @@ class _LocationStepState extends State<LocationStep> {
                 ),
                 onChanged: (value) {
                   context.read<VerificationBloc>().add(
-                    VerificationFieldChanged(
-                      field: 'address',
-                      value: value,
-                    ),
+                    VerificationDraftSaved(),
                   );
                 },
               ),
@@ -245,10 +236,7 @@ class _LocationStepState extends State<LocationStep> {
                 ),
                 onChanged: (value) {
                   context.read<VerificationBloc>().add(
-                    VerificationFieldChanged(
-                      field: 'landmarks',
-                      value: value,
-                    ),
+                    VerificationDraftSaved(),
                   );
                 },
               ),

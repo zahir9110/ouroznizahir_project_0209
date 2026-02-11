@@ -1,0 +1,94 @@
+// Règles Firestore pour la feature Stories
+// À intégrer dans firestore.rules principal
+
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // ============================================
+    // 🎬 STORIES
+    // ============================================
+    match /stories/{storyId} {
+      
+      // Lecture: stories actives uniquement, non expirées
+      allow read: if resource.data.status == 'active' 
+        && request.time < resource.data.expiresAt;
+      
+      // Création: user authentifié, userId = auth.uid
+      allow create: if request.auth != null 
+        && request.resource.data.userId == request.auth.uid
+        && request.resource.data.createdAt == request.time
+        && request.resource.data.expiresAt == request.time + duration.value(24, 'h')
+        && request.resource.data.status == 'active';
+      
+      // Mise à jour: compteurs uniquement (par Cloud Functions)
+      allow update: if false; // Seules les Functions peuvent update
+      
+      // Suppression: propriétaire uniquement (soft delete status='deleted')
+      allow delete: if request.auth.uid == resource.data.userId;
+      
+      // ============================================
+      // 🎬 VIEWERS (qui a vu la story)
+      // ============================================
+      match /viewers/{viewerId} {
+        // Écriture: user enregistre sa propre vue
+        allow create: if request.auth.uid == viewerId
+          && request.resource.data.viewedAt == request.time;
+        
+        allow update: if request.auth.uid == viewerId;
+        
+        // Lecture: propriétaire de la story uniquement
+        allow read: if request.auth.uid == get(/databases/$(database)/documents/stories/$(storyId)).data.userId;
+      }
+    }
+    
+    // ============================================
+    // 📱 FEED STORIES UTILISATEUR (dénormalisé)
+    // ============================================
+    match /users/{userId}/stories_feed/{storyId} {
+      // Lecture: owner uniquement
+      allow read: if request.auth.uid == userId;
+      
+      // Écriture: Cloud Functions uniquement (fanout)
+      allow write: if false;
+    }
+    
+    // ============================================
+    // 👤 STORIES D'UN USER (index)
+    // ============================================
+    match /users/{userId}/stories/{storyId} {
+      // Lecture: public
+      allow read: if true;
+      
+      // Écriture: Cloud Functions uniquement
+      allow write: if false;
+    }
+    
+  }
+}
+
+// ============================================
+// 🔐 RÈGLES STORAGE (stories médias)
+// ============================================
+rules_version = '2';
+service firebase.storage {
+  match /b/{bucket}/o {
+    
+    // Stories médias
+    match /stories/{userId}/{mediaId} {
+      // Upload: user authentifié, son propre dossier
+      allow write: if request.auth != null 
+        && request.auth.uid == userId
+        && request.resource.size < 100 * 1024 * 1024 // Max 100MB
+        && (request.resource.contentType.matches('image/.*') 
+           || request.resource.contentType.matches('video/.*'));
+      
+      // Lecture: public (si URL partagée)
+      allow read: if true;
+      
+      // Suppression: propriétaire ou Cloud Function
+      allow delete: if request.auth.uid == userId;
+    }
+    
+  }
+}

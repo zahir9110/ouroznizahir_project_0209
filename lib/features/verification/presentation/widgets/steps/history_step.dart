@@ -34,6 +34,10 @@ class _HistoryStepState extends State<HistoryStep> {
   Widget build(BuildContext context) {
     return BlocBuilder<VerificationBloc, VerificationState>(
       builder: (context, state) {
+        final progressState = state is VerificationInProgress 
+            ? state 
+            : const VerificationInProgress(currentStep: 0, completionPercentage: 0);
+            
         return SingleChildScrollView(
           padding: EdgeInsets.all(24.w),
           child: Column(
@@ -137,10 +141,7 @@ class _HistoryStepState extends State<HistoryStep> {
                 ),
                 onChanged: (value) {
                   context.read<VerificationBloc>().add(
-                    VerificationFieldChanged(
-                      field: 'biography',
-                      value: value,
-                    ),
+                    VerificationDraftSaved(),
                   );
                 },
               ),
@@ -181,10 +182,7 @@ class _HistoryStepState extends State<HistoryStep> {
                 ),
                 onChanged: (value) {
                   context.read<VerificationBloc>().add(
-                    VerificationFieldChanged(
-                      field: 'achievements',
-                      value: value,
-                    ),
+                    VerificationDraftSaved(),
                   );
                 },
               ),
@@ -226,14 +224,14 @@ class _HistoryStepState extends State<HistoryStep> {
                       ),
                     ),
                     SizedBox(height: 20.h),
-                    _buildProgressSummary('Identité vérifiée', state.stepIdentityValid),
+                    _buildProgressSummary('Identité vérifiée', progressState.stepIdentityValid),
                     SizedBox(height: 8.h),
-                    _buildProgressSummary('Légitimité établie', state.legitimacyValid),
+                    _buildProgressSummary('Légitimité établie', progressState.legitimacyValid),
                     SizedBox(height: 8.h),
-                    _buildProgressSummary('Confiance renforcée', state.trustValid),
+                    _buildProgressSummary('Confiance renforcée', progressState.trustValid),
                     SizedBox(height: 20.h),
                     ElevatedButton.icon(
-                      onPressed: state.isReadyForSubmission
+                      onPressed: progressState.isReadyForSubmission
                           ? () => widget.onSubmit(state)
                           : null,
                       icon: const Icon(Icons.send),

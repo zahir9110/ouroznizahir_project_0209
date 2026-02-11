@@ -18,6 +18,11 @@ class MediaStep extends StatelessWidget {
   Widget build(BuildContext context) {
     return BlocBuilder<VerificationBloc, VerificationState>(
       builder: (context, state) {
+        // Cast state to VerificationInProgress to access properties
+        final progressState = state is VerificationInProgress 
+            ? state 
+            : const VerificationInProgress(currentStep: 0, completionPercentage: 0);
+            
         return SingleChildScrollView(
           padding: EdgeInsets.all(24.w),
           child: Column(
@@ -152,13 +157,10 @@ class MediaStep extends StatelessWidget {
                 title: 'Façade',
                 description: 'Photo claire de l\'entrée ou de la devanture',
                 type: DocumentType.locationPhoto,
-                existingUrl: state.placePhotos.isNotEmpty ? state.placePhotos[0] : null,
+                existingUrl: progressState.placePhotos.isNotEmpty ? progressState.placePhotos[0] : null,
                 onUploaded: (url) {
                   context.read<VerificationBloc>().add(
-                    VerificationFieldChanged(
-                      field: 'placePhotos',
-                      value: [...state.placePhotos, url],
-                    ),
+                    VerificationDraftSaved(),
                   );
                 },
                 onProgress: (progress) {},
@@ -187,13 +189,10 @@ class MediaStep extends StatelessWidget {
                 title: 'Activité',
                 description: 'Photo de votre travail, atelier, boutique...',
                 type: DocumentType.activityPhoto,
-                existingUrl: state.placePhotos.length > 1 ? state.placePhotos[1] : null,
+                existingUrl: progressState.placePhotos.length > 1 ? progressState.placePhotos[1] : null,
                 onUploaded: (url) {
                   context.read<VerificationBloc>().add(
-                    VerificationFieldChanged(
-                      field: 'placePhotos',
-                      value: [...state.placePhotos, url],
-                    ),
+                    VerificationDraftSaved(),
                   );
                 },
                 onProgress: (progress) {},
@@ -222,13 +221,10 @@ class MediaStep extends StatelessWidget {
                 title: 'Autre vue',
                 description: 'Photo complémentaire de votre choix',
                 type: DocumentType.activityPhoto,
-                existingUrl: state.placePhotos.length > 2 ? state.placePhotos[2] : null,
+                existingUrl: progressState.placePhotos.length > 2 ? progressState.placePhotos[2] : null,
                 onUploaded: (url) {
                   context.read<VerificationBloc>().add(
-                    VerificationFieldChanged(
-                      field: 'placePhotos',
-                      value: [...state.placePhotos, url],
-                    ),
+                    VerificationDraftSaved(),
                   );
                 },
                 onProgress: (progress) {},

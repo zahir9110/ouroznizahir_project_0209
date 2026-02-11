@@ -7,7 +7,7 @@
 	<key>CFBundleDevelopmentRegion</key>
 	<string>$(DEVELOPMENT_LANGUAGE)</string>
 	<key>CFBundleDisplayName</key>
-	<string>Benin Experience</string>
+	<string>Bōken</string>
 	<key>CFBundleExecutable</key>
 	<string>$(EXECUTABLE_NAME)</string>
 	<key>CFBundleIdentifier</key>
@@ -16,7 +16,7 @@
 	<string>6.0</string>
 	<key>CFBundleName</key>
 
-	<string>benin_experience</string>
+	<string>Bōken</string>
 	<key>CFBundlePackageType</key>
 	<string>APPL</string>
 	<key>CFBundleShortVersionString</key>
@@ -49,8 +49,8 @@
 
 	<key>UISupportedInterfaceOrientations</key>
 	<key>NSCameraUsageDescription</key>
-	<string>We need camera access to capture documents</string>
+	<string>bōken a besoin d'accéder à votre caméra pour prendre des photos de vos offres</string>
 	<key>NSPhotoLibraryUsageDescription</key>
-	<string>We need photo library access to select documents</string>
+	<string>bōken a besoin d'accéder à vos photos pour ajouter des images à vos offres</string>
 </dict>
 </plist>

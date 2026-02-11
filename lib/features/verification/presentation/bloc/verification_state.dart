@@ -14,44 +14,85 @@ class VerificationInProgress extends VerificationState {
   final int currentStep;
   final double completionPercentage;
   final DateTime? lastSaved;
+  final VerificationSubmissionStatus submissionStatus;
   
-  // Validation flags
+  // Form data
+  final String fullName;
+  final String? professionalType;
+  final List<String> placePhotos;
+  
+  // Step validation flags
+  final bool stepIdentityValid;
+  final bool stepProfessionalValid;
+  final bool stepLocationValid;
+  final bool stepDocumentsValid;
+  final bool stepMediaValid;
+  final bool stepHistoryValid;
+  
+  // Overall category validation (for 3-question model)
   final bool identityValid;
-  final bool legalValid;
-  final bool locationValid;
-  final bool mediaValid;
-  final bool offerValid;
+  final bool legitimacyValid;
+  final bool trustValid;
 
   const VerificationInProgress({
     required this.currentStep,
     required this.completionPercentage,
     this.lastSaved,
+    this.submissionStatus = VerificationSubmissionStatus.initial,
+    this.fullName = '',
+    this.professionalType,
+    this.placePhotos = const [],
+    this.stepIdentityValid = false,
+    this.stepProfessionalValid = false,
+    this.stepLocationValid = false,
+    this.stepDocumentsValid = false,
+    this.stepMediaValid = false,
+    this.stepHistoryValid = false,
     this.identityValid = false,
-    this.legalValid = false,
-    this.locationValid = false,
-    this.mediaValid = false,
-    this.offerValid = false,
+    this.legitimacyValid = false,
+    this.trustValid = false,
   });
+
+  double get completionProgress => completionPercentage / 100;
+  
+  bool get isReadyForSubmission => 
+    identityValid && legitimacyValid && trustValid;
 
   VerificationInProgress copyWith({
     int? currentStep,
     double? completionPercentage,
     DateTime? lastSaved,
+    VerificationSubmissionStatus? submissionStatus,
+    String? fullName,
+    String? professionalType,
+    List<String>? placePhotos,
+    bool? stepIdentityValid,
+    bool? stepProfessionalValid,
+    bool? stepLocationValid,
+    bool? stepDocumentsValid,
+    bool? stepMediaValid,
+    bool? stepHistoryValid,
     bool? identityValid,
-    bool? legalValid,
-    bool? locationValid,
-    bool? mediaValid,
-    bool? offerValid,
+    bool? legitimacyValid,
+    bool? trustValid,
   }) {
     return VerificationInProgress(
       currentStep: currentStep ?? this.currentStep,
       completionPercentage: completionPercentage ?? this.completionPercentage,
       lastSaved: lastSaved ?? this.lastSaved,
+      submissionStatus: submissionStatus ?? this.submissionStatus,
+      fullName: fullName ?? this.fullName,
+      professionalType: professionalType ?? this.professionalType,
+      placePhotos: placePhotos ?? this.placePhotos,
+      stepIdentityValid: stepIdentityValid ?? this.stepIdentityValid,
+      stepProfessionalValid: stepProfessionalValid ?? this.stepProfessionalValid,
+      stepLocationValid: stepLocationValid ?? this.stepLocationValid,
+      stepDocumentsValid: stepDocumentsValid ?? this.stepDocumentsValid,
+      stepMediaValid: stepMediaValid ?? this.stepMediaValid,
+      stepHistoryValid: stepHistoryValid ?? this.stepHistoryValid,
       identityValid: identityValid ?? this.identityValid,
-      legalValid: legalValid ?? this.legalValid,
-      locationValid: locationValid ?? this.locationValid,
-      mediaValid: mediaValid ?? this.mediaValid,
-      offerValid: offerValid ?? this.offerValid,
+      legitimacyValid: legitimacyValid ?? this.legitimacyValid,
+      trustValid: trustValid ?? this.trustValid,
     );
   }
 
@@ -60,11 +101,19 @@ class VerificationInProgress extends VerificationState {
     currentStep,
     completionPercentage,
     lastSaved,
+    submissionStatus,
+    fullName,
+    professionalType,
+    placePhotos,
+    stepIdentityValid,
+    stepProfessionalValid,
+    stepLocationValid,
+    stepDocumentsValid,
+    stepMediaValid,
+    stepHistoryValid,
     identityValid,
-    legalValid,
-    locationValid,
-    mediaValid,
-    offerValid,
+    legitimacyValid,
+    trustValid,
   ];
 }
 

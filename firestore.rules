@@ -1,18 +1,224 @@
-rules_version='2'
+rules_version='2';
 
 service cloud.firestore {
   match /databases/{database}/documents {
-    match /{document=**} {
-      // This rule allows anyone with your database reference to view, edit,
-      // and delete all data in your database. It is useful for getting
-      // started, but it is configured to expire after 30 days because it
-      // leaves your app open to attackers. At that time, all client
-      // requests to your database will be denied.
-      //
-      // Make sure to write security rules for your app before that time, or
-      // else all client requests to your database will be denied until you
-      // update your rules.
-      allow read, write: if request.time < timestamp.date(2026, 3, 6);
+    
+    // ============================================
+    // 🔐 BŌKEN - RÈGLES D'AUTORISATION RBAC
+    // ============================================
+    
+    // === HELPER FUNCTIONS ===
+    
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+    
+    function isUser() {
+      return isAuthenticated() && 
+             get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'user';
+    }
+    
+    function isOrganizer() {
+      return isAuthenticated() && 
+             get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'organizer';
+    }
+    
+    function isUserOrOrganizer() {
+      return isUser() || isOrganizer();
+    }
+    
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+    
+    // === COLLECTION RULES ===
+    
+    // Collection: users
+    match /users/{userId} {
+      // Tout le monde peut lire les profils publics (pour afficher auteurs d'avis, etc.)
+      allow read: if true;
+      
+      // Seul l'utilisateur peut créer/modifier son propre profil
+      allow create: if isAuthenticated() && request.auth.uid == userId;
+      allow update: if isOwner(userId);
+      
+      // Pas de suppression directe (soft delete via Cloud Functions)
+      allow delete: if false;
+    }
+    
+    // Collection: places
+    match /places/{placeId} {
+      // ✅ GUEST: Lecture libre des lieux publiés
+      allow read: if resource.data.isPublished == true;
+      
+      // ✅ ORGANIZER: Peut lire ses propres lieux non publiés
+      allow read: if isOrganizer() && resource.data.organizerId == request.auth.uid;
+      
+      // ✅ ORGANIZER: Peut créer des lieux
+      allow create: if isOrganizer();
+      
+      // ✅ ORGANIZER: Peut modifier ses propres lieux
+      allow update: if isOrganizer() && resource.data.organizerId == request.auth.uid;
+      
+      // ❌ Pas de suppression directe
+      allow delete: if false;
+    }
+    
+    // Collection: ratings
+    match /ratings/{ratingId} {
+      // ✅ GUEST: Lecture libre des notes
+      allow read: if true;
+      
+      // ✅ USER/ORGANIZER: Peut noter un lieu
+      allow create: if isUserOrOrganizer() && 
+                       request.resource.data.userId == request.auth.uid &&
+                       request.resource.data.score >= 1 && 
+                       request.resource.data.score <= 5;
+      
+      // ✅ USER/ORGANIZER: Peut modifier sa propre note
+      allow update: if isOwner(resource.data.userId);
+      
+      // ✅ USER/ORGANIZER: Peut supprimer sa propre note
+      allow delete: if isOwner(resource.data.userId);
+    }
+    
+    // Collection: reviews
+    match /reviews/{reviewId} {
+      // ✅ GUEST: Lecture libre des avis
+      allow read: if true;
+      
+      // ✅ USER/ORGANIZER: Peut publier un avis
+      allow create: if isUserOrOrganizer() && 
+                       request.resource.data.userId == request.auth.uid;
+      
+      // ✅ USER/ORGANIZER: Peut modifier son propre avis
+      allow update: if isOwner(resource.data.userId);
+      
+      // ✅ USER/ORGANIZER: Peut supprimer son propre avis
+      allow delete: if isOwner(resource.data.userId);
+    }
+    
+    // Collection: messages
+    match /messages/{messageId} {
+      // ✅ USER/ORGANIZER: Peut lire les messages où il est sender OU receiver
+      allow read: if isUserOrOrganizer() && 
+                     (resource.data.senderId == request.auth.uid || 
+                      resource.data.receiverId == request.auth.uid);
+      
+      // ✅ USER/ORGANIZER: Peut envoyer un message
+      allow create: if isUserOrOrganizer() && 
+                       request.resource.data.senderId == request.auth.uid;
+      
+      // ✅ USER/ORGANIZER: Peut marquer comme lu (si receiver)
+      allow update: if isOwner(resource.data.receiverId) && 
+                       request.resource.data.diff(resource.data).affectedKeys().hasOnly(['isRead']);
+      
+      // ❌ Pas de suppression directe
+      allow delete: if false;
+    }
+    
+    // Collection: likes
+    match /likes/{likeId} {
+      // ✅ Lecture libre (pour compter les likes)
+      allow read: if true;
+      
+      // ✅ USER/ORGANIZER: Peut liker
+      allow create: if isUserOrOrganizer() && 
+                       request.resource.data.userId == request.auth.uid;
+      
+      // ✅ USER/ORGANIZER: Peut supprimer son propre like
+      allow delete: if isOwner(resource.data.userId);
+      
+      // ❌ Pas de modification
+      allow update: if false;
+    }
+    
+    // Collection: comments
+    match /comments/{commentId} {
+      // ✅ Lecture libre
+      allow read: if true;
+      
+      // ✅ USER/ORGANIZER: Peut commenter
+      allow create: if isUserOrOrganizer() && 
+                       request.resource.data.userId == request.auth.uid;
+      
+      // ✅ USER/ORGANIZER: Peut modifier son propre commentaire
+      allow update: if isOwner(resource.data.userId);
+      
+      // ✅ USER/ORGANIZER: Peut supprimer son propre commentaire
+      allow delete: if isOwner(resource.data.userId);
+    }
+    
+    // Collection: shares
+    match /shares/{shareId} {
+      // ✅ Lecture libre (pour compter les partages)
+      allow read: if true;
+      
+      // ✅ USER/ORGANIZER: Peut partager
+      allow create: if isUserOrOrganizer() && 
+                       request.resource.data.userId == request.auth.uid;
+      
+      // ✅ USER/ORGANIZER: Peut supprimer son propre partage
+      allow delete: if isOwner(resource.data.userId);
+      
+      // ❌ Pas de modification
+      allow update: if false;
+    }
+    
+    // Collection: favorites
+    match /favorites/{favoriteId} {
+      // ✅ USER/ORGANIZER: Peut lire ses propres favoris
+      allow read: if isOwner(resource.data.userId);
+      
+      // ✅ USER/ORGANIZER: Peut sauvegarder un lieu
+      allow create: if isUserOrOrganizer() && 
+                       request.resource.data.userId == request.auth.uid;
+      
+      // ✅ USER/ORGANIZER: Peut supprimer un favori
+      allow delete: if isOwner(resource.data.userId);
+      
+      // ❌ Pas de modification
+      allow update: if false;
+    }
+    
+    // Collection: offers
+    match /offers/{offerId} {
+      // ✅ GUEST: Lecture libre des offres publiées
+      allow read: if resource.data.isPublished == true;
+      
+      // ✅ ORGANIZER: Peut lire ses propres offres non publiées
+      allow read: if isOrganizer() && resource.data.organizerId == request.auth.uid;
+      
+      // ✅ ORGANIZER: Peut créer une offre
+      allow create: if isOrganizer() && 
+                       request.resource.data.organizerId == request.auth.uid;
+      
+      // ✅ ORGANIZER: Peut modifier ses propres offres
+      allow update: if isOrganizer() && resource.data.organizerId == request.auth.uid;
+      
+      // ✅ ORGANIZER: Peut supprimer ses propres offres
+      allow delete: if isOrganizer() && resource.data.organizerId == request.auth.uid;
+    }
+    
+    // Collection: bookings
+    match /bookings/{bookingId} {
+      // ✅ USER/ORGANIZER: Peut lire ses propres réservations (en tant que user)
+      allow read: if isUserOrOrganizer() && resource.data.userId == request.auth.uid;
+      
+      // ✅ ORGANIZER: Peut lire les réservations de ses offres
+      allow read: if isOrganizer() && resource.data.organizerId == request.auth.uid;
+      
+      // ✅ USER/ORGANIZER: Peut créer une réservation
+      allow create: if isUserOrOrganizer() && 
+                       request.resource.data.userId == request.auth.uid;
+      
+      // ✅ ORGANIZER: Peut modifier le statut des réservations de ses offres
+      allow update: if isOrganizer() && 
+                       resource.data.organizerId == request.auth.uid &&
+                       request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status', 'updatedAt']);
+      
+      // ❌ Pas de suppression directe
+      allow delete: if false;
     }
   }
 }

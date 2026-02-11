@@ -22,7 +22,6 @@ export * from './verification/ai_verification_service';
 
 // Stories & Contenu Temporaire
 export * from './stories/story_lifecycle';
-export * from './stories/story_cleanup';
 
 // Notifications Push
 export * from './notifications/push_notifications';

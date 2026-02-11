@@ -152,13 +152,10 @@ class DocumentsStep extends StatelessWidget {
                 title: 'RCCM',
                 description: 'Registre du Commerce et du Crédit Mobilier',
                 type: DocumentType.businessRegistration,
-                existingUrl: state.businessRegistrationUrl,
+                existingUrl: null,
                 onUploaded: (url) {
                   context.read<VerificationBloc>().add(
-                    VerificationFieldChanged(
-                      field: 'businessRegistrationUrl',
-                      value: url,
-                    ),
+                    VerificationDraftSaved(),
                   );
                 },
                 onProgress: (progress) {},
@@ -187,13 +184,10 @@ class DocumentsStep extends StatelessWidget {
                 title: 'IFU',
                 description: 'Certificat fiscal professionnel',
                 type: DocumentType.taxDocument,
-                existingUrl: state.taxDocumentUrl,
+                existingUrl: null,
                 onUploaded: (url) {
                   context.read<VerificationBloc>().add(
-                    VerificationFieldChanged(
-                      field: 'taxDocumentUrl',
-                      value: url,
-                    ),
+                    VerificationDraftSaved(),
                   );
                 },
                 onProgress: (progress) {},
@@ -222,13 +216,10 @@ class DocumentsStep extends StatelessWidget {
                 title: 'Licence',
                 description: 'Document professionnel officiel',
                 type: DocumentType.businessRegistration,
-                existingUrl: state.professionalLicenseUrl,
+                existingUrl: null,
                 onUploaded: (url) {
                   context.read<VerificationBloc>().add(
-                    VerificationFieldChanged(
-                      field: 'professionalLicenseUrl',
-                      value: url,
-                    ),
+                    VerificationDraftSaved(),
                   );
                 },
                 onProgress: (progress) {},

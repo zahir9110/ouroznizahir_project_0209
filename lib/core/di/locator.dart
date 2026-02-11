@@ -5,7 +5,15 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-
+import '../../features/stories/data/datasources/stories_remote_datasource.dart';
+import '../../features/stories/data/repositories/stories_repository_impl.dart';
+import '../../features/stories/domain/repositories/stories_repository.dart';
+import '../../features/stories/domain/usecases/get_following_stories.dart';
+import '../../features/stories/domain/usecases/view_story.dart';
+import '../../features/stories/domain/usecases/create_story.dart';
+import '../../features/stories/domain/usecases/delete_story.dart';
+import '../../features/stories/presentation/bloc/stories_feed_bloc.dart';
+import '../../features/stories/presentation/bloc/story_viewer_bloc.dart';
 // Events Feature
 import '../../features/events/data/datasources/events_remote_datasource.dart';
 import '../../features/events/data/repositories/events_repository_impl.dart';
@@ -79,5 +87,37 @@ Future<void> setupLocator() async {
       getCulturalGems: sl(),
       getSpontaneousEvents: sl(),
     ),
+  );
+   
+  // ============================================
+  // 🎬 FEATURE: STORIES
+  // ============================================
+  
+  // Data sources
+  sl.registerLazySingleton<StoriesRemoteDataSource>(
+    () => StoriesRemoteDataSourceImpl(
+      firestore: sl(),
+      storage: sl(),
+    ),
+  );
+  
+  // Repositories
+  sl.registerLazySingleton<StoriesRepository>(
+    () => StoriesRepositoryImpl(remoteDataSource: sl()),
+  );
+  
+  // Use cases
+  sl.registerLazySingleton(() => GetFollowingStories(sl()));
+  sl.registerLazySingleton(() => ViewStory(sl()));
+  sl.registerLazySingleton(() => CreateStory(sl()));
+  sl.registerLazySingleton(() => DeleteStory(sl()));
+  
+  // BLoCs (factory pour nouvelle instance)
+  sl.registerFactory(
+    () => StoriesFeedBloc(getFollowingStories: sl()),
+  );
+  
+  sl.registerFactory(
+    () => StoryViewerBloc(viewStory: sl()), 
   );
 }
